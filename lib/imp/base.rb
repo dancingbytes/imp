@@ -29,7 +29,7 @@ module Imp
 
       @pid.stop(sig)
       puts "Process with pid #{@pid.pid} successfully stopped."
-      STDOUT.flush
+      ::STDOUT.flush
       exit(0)
 
     end # stop
