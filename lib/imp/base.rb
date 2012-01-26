@@ -14,10 +14,10 @@ module Imp
     def start(multiple = false)
 
       if multiple || !::Imp::Util.exists?(@name)
-        @pid.pid = call_daemon
-        puts "Process with pid #{@pid.pid} was started."
+        call_daemon
+        ::STDOUT.puts "Process with pid #{@pid.pid} was started."
       else
-        puts "Process with name #{@name} already running. Skip."
+        ::STDOUT.puts "Process with name #{@name} already running. Skip."
       end
       self
 
@@ -28,9 +28,9 @@ module Imp
       yield if block_given?
 
       @pid.stop(sig)
-      puts "Process with pid #{@pid.pid} successfully stopped."
+      ::STDOUT.puts "Process with pid #{@pid.pid} successfully stopped."
       ::STDOUT.flush
-      exit(0)
+      exit
 
     end # stop
 
@@ -70,8 +70,7 @@ module Imp
 
         begin
           ::STDOUT.reopen @log_file, "a"
-          ::STDERR.reopen @log_file, "a"
-          ::File.chmod(0644, @log_file)
+          ::STDERR.reopen ::STDOUT
         rescue ::Imp::Exception
           std_out_err_reopen
         end
@@ -89,24 +88,23 @@ module Imp
     def std_out_err_reopen
 
       begin ::STDOUT.reopen "/dev/null"; rescue ::Imp::Exception; end
-      begin ::STDERR.reopen "/dev/null"; rescue ::Imp::Exception; end
+      begin ::STDERR.reopen ::STDOUT; rescue ::Imp::Exception; end
 
     end # std_out_err_reopen
 
     def call_daemon
 
       rd, wr = ::IO.pipe
-    
+      
       if tmppid = safefork
-        
+
         # parent
         wr.close
-        pid = rd.read.to_i
+        @pid.pid = rd.read.to_i
         rd.close
 
         ::Process.waitpid(tmppid)
-        return pid
-
+        
       else
 
         # child
@@ -116,7 +114,7 @@ module Imp
         raise ::Imp::Exception.new('Cannot detach from controlling terminal') unless ::Process.setsid
         exit if safefork
         
-        wr.write ::Process.pid
+        wr.write (@pid.pid = ::Process.pid)
         wr.close
 
         $0 = @name
@@ -127,7 +125,7 @@ module Imp
         # Make sure all file descriptors are closed
         ::ObjectSpace.each_object(::IO) do |io|
 
-          unless [STDIN, STDOUT, STDERR].include?(io)
+          unless [::STDIN, ::STDOUT, ::STDERR].include?(io)
             begin
               io.close unless io.closed?
             rescue ::Imp::Exception
@@ -143,8 +141,9 @@ module Imp
         end
 
         redirect_io
+
         @block.call
-        exit(0)
+        exit
         
       end # if
 

@@ -28,10 +28,7 @@ module Imp
     end # new
 
     def pid=(numeric_pid)
-
-      @pid ||= numeric_pid
-      @pid
-
+      @pid = numeric_pid
     end # pid=
 
     def running?
@@ -52,7 +49,7 @@ module Imp
         ::Timeout::timeout(20) {
 
           if self.running?
-            sleep(0.5)
+            sleep(1)
             ::Process.kill('KILL', @pid)
           end
           
@@ -60,7 +57,7 @@ module Imp
         return true
 
       rescue ::Timeout::Error
-        puts "Unable to forcefully kill process with pid #{@pid}."
+        ::STDOUT.puts "Unable to forcefully kill process with pid #{@pid}."
         ::STDOUT.flush
         return false
       rescue ::Errno::ESRCH
