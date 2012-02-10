@@ -37,7 +37,8 @@ module Imp
 
     def stop(sig = 'QUIT')
 
-      return false if @pid.nil?
+      return false if @pid.nil? || @stoping
+      @stoping = true
 
       begin
         ::Process.kill(sig, @pid)
@@ -62,6 +63,8 @@ module Imp
         return false
       rescue ::Errno::ESRCH
         return true
+      ensure
+        @stoping = false
       end
 
     end # stop

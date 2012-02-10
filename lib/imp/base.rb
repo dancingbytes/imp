@@ -24,14 +24,7 @@ module Imp
     end # start
 
     def stop(sig = 'QUIT')
-
-      yield if block_given?
-
       @pid.stop(sig)
-      ::STDOUT.puts "Process with pid #{@pid.pid} successfully stopped."
-      ::STDOUT.flush
-      exit
-
     end # stop
 
     def pid
@@ -142,7 +135,19 @@ module Imp
 
         redirect_io
 
-        @block.call
+        at_exit do
+
+          if $!.nil? || $!.is_a?(::SystemExit) && $!.success?
+            ::STDOUT.puts "Process [pid #{@pid.pid}] successfully stopped."
+          else
+            code = $!.is_a?(::SystemExit) ? $!.status : 1
+            ::STDOUT.puts "Process [pid #{@pid.pid}] failure with code #{code}."
+          end
+          ::STDOUT.flush
+
+        end  
+
+        @block.call(self)
         exit
         
       end # if
