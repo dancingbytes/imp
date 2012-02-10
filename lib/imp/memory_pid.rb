@@ -1,6 +1,4 @@
 # encoding: utf-8
-require 'timeout'
-
 module Imp
 
   class MemoryPid
@@ -24,12 +22,17 @@ module Imp
       
     end # class << self
 
-    def initialize
+    def initialize(master_pid)
+      @master_pid = master_pid || 0
     end # new
 
     def pid=(numeric_pid)
       @pid = numeric_pid
     end # pid=
+
+    def owner?(proc_pid)
+      @master_pid == proc_pid
+    end # owner?
 
     def running?
       self.class.running?(@pid)
@@ -43,26 +46,33 @@ module Imp
       begin
         ::Process.kill(sig, @pid)
       rescue ::Errno::ESRCH
+        @stoping = false
+        return true
       end
 
       begin
 
-        ::Timeout::timeout(20) {
+        5.times {
 
           if self.running?
             sleep(1)
             ::Process.kill('KILL', @pid)
           end
-          
-        }
-        return true
 
-      rescue ::Timeout::Error
-        ::STDOUT.puts "Unable to forcefully kill process with pid #{@pid}."
-        ::STDOUT.flush
-        return false
+        }
+
+        if self.running?
+          ::STDOUT.puts "Unable to forcefully kill process with pid #{@pid}."
+          ::STDOUT.flush
+          return false
+        else
+          return true
+        end  
+
       rescue ::Errno::ESRCH
         return true
+      rescue => e
+        return false
       ensure
         @stoping = false
       end

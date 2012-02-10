@@ -7,7 +7,7 @@ module Imp
 
       @name, @log_file = name, log_file
       @block  = block
-      @pid    = ::Imp::MemoryPid.new
+      @pid    = ::Imp::MemoryPid.new(::Process.pid)
 
     end # new
 
@@ -15,10 +15,29 @@ module Imp
 
       if multiple || !::Imp::Util.exists?(@name)
         call_daemon
-        ::STDOUT.puts "Process with pid #{@pid.pid} was started."
+        ::STDOUT.puts "Process [pid #{@pid.pid}] was started."
       else
-        ::STDOUT.puts "Process with name #{@name} already running. Skip."
+        ::STDOUT.puts "Process [#{@name}] already running. Skip."
       end
+
+      at_exit do
+
+        if @pid.owner?(::Process.pid) && self.running?
+
+          self.stop
+
+          if $!.nil? || $!.is_a?(::SystemExit) && $!.success?
+            ::STDOUT.puts "Process [pid #{@pid.pid}] successfully stopped."
+          else
+            code = $!.is_a?(::SystemExit) ? $!.status : 1
+            ::STDOUT.puts "Process [pid #{@pid.pid}] failure with code #{code}."
+          end
+          ::STDOUT.flush
+          
+        end # if
+
+      end # at_exit
+
       self
 
     end # start
@@ -32,8 +51,12 @@ module Imp
     end # pid
 
     def status
-      @pid.running? ? [true, @pid.pid] : [false, 0]
+      self.running? ? [true, self.pid] : [false, 0]
     end # status
+
+    def running?
+      @pid.running?
+    end # running?  
 
     private
 
@@ -135,19 +158,8 @@ module Imp
 
         redirect_io
 
-        at_exit do
-
-          if $!.nil? || $!.is_a?(::SystemExit) && $!.success?
-            ::STDOUT.puts "Process [pid #{@pid.pid}] successfully stopped."
-          else
-            code = $!.is_a?(::SystemExit) ? $!.status : 1
-            ::STDOUT.puts "Process [pid #{@pid.pid}] failure with code #{code}."
-          end
-          ::STDOUT.flush
-
-        end  
-
-        @block.call(self)
+        @block.call
+        
         exit
         
       end # if
