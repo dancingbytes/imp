@@ -12,7 +12,7 @@ module Imp
     end # new
 
     def start(multiple = false)
-
+      
       if multiple || !::Imp::Util.exists?(@name)
         call_daemon
         ::STDOUT.puts "Process [pid #{@pid.pid}] was started."
@@ -27,12 +27,11 @@ module Imp
           self.stop
 
           if $!.nil? || $!.is_a?(::SystemExit) && $!.success?
-            ::STDOUT.puts "Process [pid #{@pid.pid}] successfully stopped."
+            puts "Process [pid #{@pid.pid}] successfully stopped."
           else
             code = $!.is_a?(::SystemExit) ? $!.status : 1
-            ::STDOUT.puts "Process [pid #{@pid.pid}] failure with code #{code}."
+            puts "Process [pid #{@pid.pid}] failure with code #{code}."
           end
-          ::STDOUT.flush
           
         end # if
 
@@ -59,24 +58,6 @@ module Imp
     end # running?  
 
     private
-
-    def safefork
-
-      @tryagain = true
-
-      while @tryagain
-        @tryagain = false
-        begin
-          if pid = fork
-            return pid
-          end
-        rescue ::Errno::EWOULDBLOCK
-          sleep 5
-          @tryagain = true
-        end
-      end
-
-    end # safefork
 
     def redirect_io
 
@@ -111,26 +92,27 @@ module Imp
     def call_daemon
 
       rd, wr = ::IO.pipe
-      
-      if tmppid = safefork
 
-        # parent
+      if (tmppid = ::Process.fork)
+
+        # in parent process
         wr.close
         @pid.pid = rd.read.to_i
         rd.close
 
         ::Process.waitpid(tmppid)
+        ::Process.detach(tmppid)
         
-      else
+      else  
 
-        # child
+        # in child process
         rd.close
 
         # Detach from the controlling terminal
         raise ::Imp::Exception.new('Cannot detach from controlling terminal') unless ::Process.setsid
-        exit if safefork
+        exit if fork
         
-        wr.write (@pid.pid = ::Process.pid)
+        wr.write(pid = ::Process.pid)
         wr.close
 
         $0 = @name
@@ -157,11 +139,9 @@ module Imp
         end
 
         redirect_io
-
         @block.call
-        
         exit
-        
+
       end # if
 
     end # call_daemon
