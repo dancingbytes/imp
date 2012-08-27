@@ -3,38 +3,36 @@ module Imp
 
   module Util
 
-    class << self
+    extend self
 
-      def find_by_name(app_name)
+    def find_by_name(app_name)
 
-        pids = []
-        begin
+      pids = []
+      begin
 
-          app_name.strip!
-          x = `ps auxw | grep -v grep | awk '{print $2, $11, $12}' | grep #{app_name}`
-          if x && x.chomp!
+        app_name = app_name.strip
+        x = `ps auxw | grep -v grep | awk '{print $2, $11, $12}' | grep #{app_name}`
+        if x && x.chomp!
 
-            (x.split(/\n/).compact || []).map { |prs|
+          (x.split(/\n/).compact || []).map { |prs|
 
-              pid, name, add = prs.split(/\s/)
-              pids << pid.to_i if app_name == name.strip
-              
-            }
+            pid, name, add = prs.split(/\s/)
+            pids << pid.to_i if app_name == name.strip
 
-          end
-          pids
+          }
 
-        rescue
         end
         pids
 
-      end # find_by_name
+      rescue
+      end
+      pids
 
-      def exists?(app_name)
-        !find_by_name(app_name).empty?
-      end # exists?
+    end # find_by_name
 
-    end # class << self
+    def exists?(app_name)
+      !find_by_name(app_name).empty?
+    end # exists?
 
   end # Util
 

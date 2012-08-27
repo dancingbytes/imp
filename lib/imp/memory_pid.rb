@@ -5,8 +5,10 @@ module Imp
 
     attr_accessor :pid
 
+    include ::Imp::Signals
+
     class << self
-      
+
       def running?(pid)
 
         return false if pid.nil?
@@ -19,24 +21,25 @@ module Imp
         end
 
       end # running?
-      
+
     end # class << self
 
-    def initialize(master_pid)
-      @master_pid = master_pid || 0
+    def initialize(pid)
+      @pid = pid
     end # new
 
-    def pid=(numeric_pid)
-      @pid = numeric_pid
-    end # pid=
-
-    def owner?(proc_pid)
-      @master_pid == proc_pid
-    end # owner?
+    def pid; @pid; end
 
     def running?
       self.class.running?(@pid)
     end # running?
+
+    alias :exists? :running?
+    alias :exist?  :running?
+
+    def signal(sig)
+      ::Process.kill(sig, @pid)
+    end # signal
 
     def stop(sig = 'QUIT')
 
@@ -44,7 +47,7 @@ module Imp
       @stoping = true
 
       begin
-        ::Process.kill(sig, @pid)
+        self.signal(sig)
       rescue ::Errno::ESRCH
         @stoping = false
         return true
@@ -56,18 +59,17 @@ module Imp
 
           if self.running?
             sleep(1)
-            ::Process.kill('KILL', @pid)
+            self.signal('KILL')
           end
 
         }
 
         if self.running?
-          ::STDOUT.puts "Unable to forcefully kill process with pid #{@pid}."
-          ::STDOUT.flush
+          puts "Unable to forcefully kill process with pid #{@pid}."
           return false
         else
           return true
-        end  
+        end
 
       rescue ::Errno::ESRCH
         return true
@@ -78,6 +80,8 @@ module Imp
       end
 
     end # stop
+
+    def inspect; nil; end
 
   end # MemoryPid
 
