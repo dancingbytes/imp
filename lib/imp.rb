@@ -6,6 +6,8 @@ require 'imp/base'
 require 'imp/process'
 require 'imp/object'
 
+require 'imp/railtie'   if defined?(::Rails)
+
 module Imp
 
   extend self
