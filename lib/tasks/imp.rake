@@ -107,14 +107,14 @@ namespace :imp do
     puts "Usage: bundle exec rake imp:start p=my_process_name RAILS_ENV=production"
     puts
     puts "Available rake commands:  "
-    puts "  list                    Show list of process"
-    puts "  stop -p=name            Stop process with `name`"
-    puts "  start -p=name           Start process with `name`"
-    puts "  restart -p=name         Restart process with `name`"
-    puts "  stop_all                Stop all processes"
-    puts "  start_all               Start all processes"
-    puts "  restart_all             Restart all processes"
-    puts "  show -p=process_name    Show information about process with `name`"
+    puts "  list                  Show list of process"
+    puts "  stop p=name           Stop process with `name`"
+    puts "  start p=name          Start process with `name`"
+    puts "  restart p=name        Restart process with `name`"
+    puts "  stop_all              Stop all processes"
+    puts "  start_all             Start all processes"
+    puts "  restart_all           Restart all processes"
+    puts "  show p=name           Show information about process with `name`"
 
     puts
 
