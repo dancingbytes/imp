@@ -55,6 +55,9 @@ Rails:  3.0, 3.1, 3.2
     # Stop all
     Imp.stop_all
 
+    ### List of rake commands
+    bundle exec rake imp
+
 ### License
 
 Author: Tyralion (piliaiev@gmail.com)

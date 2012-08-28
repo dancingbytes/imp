@@ -1,8 +1,8 @@
 # encoding: utf-8
 require 'imp/util'
 require 'imp/signals'
-require 'imp/memory_pid'
-require 'imp/base'
+require 'imp/pid'
+require 'imp/manager'
 require 'imp/process'
 require 'imp/object'
 
@@ -17,20 +17,19 @@ module Imp
   def list
 
     puts "=> Imp`s process list"
-    puts "=> Name -> [Pids]"
-    puts
 
-    ::Imp::Base.names do |name|
+    ::Imp::Manager.names do |name|
 
       pids = ::Imp::Util::find_by_name(name)
-      if pids.empty?
-        puts "  #{name} -> not running"
-      else
-        puts "  #{name} -> [#{pids.join(', ')}]"
-      end
+
+      puts
+      puts "  process:  #{name}"
+      puts "  pids:     #{pids}"
+      puts "  running:  #{pids.length > 0}"
+      puts
 
     end
-    puts
+    puts "  Done."
 
   end # list
 
@@ -38,15 +37,15 @@ module Imp
 
   def start_all
 
-    ::Imp::Base.each(&:start)
+    ::Imp::Manager.each(&:start)
     nil
 
   end # start_all
 
   def stop_all(sig = 'QUIT')
 
-    ::Imp::Base.each do |pr|
-      ::Imp::Base.new(pr.name).stop(sig)
+    ::Imp::Manager.each do |pr|
+      ::Imp::Manager.new(pr.name).stop(sig)
     end
     nil
 

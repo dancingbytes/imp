@@ -1,7 +1,7 @@
 # encoding: utf-8
 module Imp
 
-  class Base
+  class Manager
 
     include ::Imp::Signals
 
@@ -11,7 +11,7 @@ module Imp
 
         raise ::Imp::Exception, "Process with name `#{process.name}` already registered!" unless self[process.name].nil?
         store[process.name] = process
-        self
+        process
 
       end # register
 
@@ -43,7 +43,7 @@ module Imp
 
     def initialize(name)
 
-      @process = ::Imp::Base[name]
+      @process = ::Imp::Manager[name]
       raise ::Imp::Exception, "Process with name `#{name}` not found!" if @process.nil?
 
     end # new
@@ -51,7 +51,7 @@ module Imp
     def start
 
       @process.start
-      self
+      nil
 
     end # start
 
@@ -59,9 +59,9 @@ module Imp
 
       self.refresh
       walk do |pid|
-        pid.signal(sig_name)
+        pid.stop(sig_name)
       end
-      self
+      nil
 
     end # stop
 
@@ -74,10 +74,7 @@ module Imp
     end # restart
 
     def refresh
-
       @pids = nil
-      self
-
     end # refresh
 
     alias :reload :refresh
@@ -94,7 +91,7 @@ module Imp
       walk do |pid|
         pid.signal(name)
       end
-      self
+      nil
 
     end # signal
 
@@ -113,7 +110,23 @@ module Imp
       pids[i]
     end # []
 
-    def inspect; nil; end
+    def inspect
+
+      logs   = @process.instance_variable_get(:@log_file)
+      block  = @process.instance_variable_get(:@block)
+      pids_a = pids.map(&:pid)
+
+      "#<Imp::Manager\n" <<
+      " process:  #{@process.name},\n" <<
+      " pids:     #{pids_a},\n" <<
+      " running:  #{pids_a.length > 0},\n" <<
+      " logs:     #{logs || '/dev/null'},\n" <<
+      " block:    #{block}>\n"
+
+    end # inspect
+
+    alias :to_s   :inspect
+    alias :to_str :inspect
 
     private
 
@@ -123,7 +136,7 @@ module Imp
 
       @pids = []
       ::Imp::Util::find_by_name(@process.name).each do |pid|
-        @pids << ::Imp::MemoryPid.new(pid)
+        @pids << ::Imp::Pid.new(pid)
       end
       @pids
 
@@ -131,19 +144,12 @@ module Imp
 
     def walk
 
-      tr = []
       pids.each do |pid|
-
-        tr << ::Thread.new {
-          yield(pid)
-        }
-
+        yield(pid)
       end
-
-      tr.join
 
     end # walk
 
-  end # Base
+  end # Manager
 
 end # Imp

@@ -1,7 +1,7 @@
 # encoding: utf-8
 module Imp
 
-  class MemoryPid
+  class Pid
 
     attr_accessor :pid
 
@@ -44,12 +44,15 @@ module Imp
     def stop(sig = 'QUIT')
 
       return false if @pid.nil? || @stoping
+      msg "is trying to stop.."
       @stoping = true
 
       begin
         self.signal(sig)
+        sleep(0.5)
       rescue ::Errno::ESRCH
         @stoping = false
+        msg "successfully stopped"
         return true
       end
 
@@ -60,20 +63,26 @@ module Imp
           if self.running?
             sleep(1)
             self.signal('KILL')
+          else
+            msg "successfully stopped"
+            return true
           end
 
         }
 
         if self.running?
-          puts "Unable to forcefully kill process with pid #{@pid}."
+          msg "unable to forcefully kill"
           return false
         else
+          msg "successfully stopped"
           return true
         end
 
       rescue ::Errno::ESRCH
+        msg "successfully stopped"
         return true
       rescue => e
+        msg "unable to forcefully kill. Error: #{e.inspect}"
         return false
       ensure
         @stoping = false
@@ -81,8 +90,20 @@ module Imp
 
     end # stop
 
-    def inspect; nil; end
+    def inspect
 
-  end # MemoryPid
+      "#<Imp::Pid\n" <<
+      " pid:      #{@pid || 0},\n" <<
+      " running:  #{self.running?}>\n"
+
+    end # inspect
+
+    private
+
+    def msg(message)
+      puts "[#{::Time.now}] Process [#{@pid}] #{message}."
+    end # msg
+
+  end # Pid
 
 end # Imp

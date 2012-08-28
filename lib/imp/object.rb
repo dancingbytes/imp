@@ -9,12 +9,13 @@ module Imp
 
       if block_given?
 
-        process = ::Imp::Process.new(name.to_s, logs, &block)
-        ::Imp::Base.register(process)
+        ::Imp::Manager.register(
+          ::Imp::Process.new(name.to_s, logs, &block)
+        )
 
       end # if
 
-      ::Imp::Base.new(name)
+      ::Imp::Manager.new(name)
 
     end # Imp
 

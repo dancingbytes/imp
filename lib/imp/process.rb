@@ -14,47 +14,45 @@ module Imp
     def start
 
       call_daemon
-
-      # Завершение работы
-      ["QUIT", "TERM"].each do |sig|
-        trap(sig) { stop }
-      end # each
-
-      # Игнорируем
-      ["HUP", "USR1", "USR2", "EXIT"].each do |sig|
-        trap(sig) { }
-      end
-
       self
 
     end # start
+
+    def reload
+
+      call_daemon(true)
+      self
+
+    end # reload
 
     def name
       @name
     end # name
 
-    def inspect; nil; end
+    def inspect
+
+      "#<Imp::Process\n" <<
+      " pid:      #{@pid ? @pid.pid : 0},\n" <<
+      " name:     #{@name},\n" <<
+      " logs:     #{@log_file},\n" <<
+      " block:    #{@block.inspect}>\n"
+
+    end # inspect
 
     private
 
-    def stop(sig = 'QUIT')
+    def trap_signals
 
-      @pid.stop(sig)
+      # Завершение работы
+      ["QUIT", "TERM"].each do |sig|
 
-      if $!.nil? || $!.is_a?(::SystemExit) && $!.success?
+        trap(sig) {
+          @pid.stop('QUIT')
+        }
 
-        puts "Process [#{@pid.pid}] successfully stopped."
-        return true
+      end # each
 
-      else
-
-        code = $!.is_a?(::SystemExit) ? $!.status : 1
-        puts "Process [#{@pid.pid}] failure with code #{code}."
-        return false
-
-      end
-
-    end # stop
+    end # trap_signals
 
     def redirect_io
 
@@ -72,7 +70,10 @@ module Imp
 
     end # redirect_io
 
-    def call_daemon
+    def call_daemon(exit_after_fork = false)
+
+      # for parent
+      trap_signals
 
       rd, wr = ::IO.pipe
 
@@ -80,11 +81,15 @@ module Imp
 
         # in parent process
         wr.close
-        @pid = ::Imp::MemoryPid.new(rd.read.to_i)
+        @pid = ::Imp::Pid.new(rd.read.to_i)
         rd.close
 
         ::Process.waitpid(tmppid)
         ::Process.detach(tmppid)
+
+        msg "was started"
+
+        exit! if exit_after_fork
 
       else
 
@@ -95,7 +100,7 @@ module Imp
         raise ::Imp::Exception.new('Cannot detach from controlling terminal') unless ::Process.setsid
         exit! if fork
 
-        @pid = ::Imp::MemoryPid.new(::Process.pid)
+        @pid = ::Imp::Pid.new(::Process.pid)
 
         wr.write(@pid.pid)
         wr.close
@@ -107,13 +112,36 @@ module Imp
 
         redirect_io
 
-        puts "Process [#{@pid.pid}] was started."
+        msg "was started"
+
+        # Перезагрузка процесса
+        ["HUP"].each do |sig|
+          trap(sig) { reload }
+        end
+
+        # Завершение работы процесса
+        at_exit {
+          msg "successfully stopped"
+        }
+
+        ["QUIT", "TERM"].each do |sig|
+
+          trap(sig) {
+            msg "successfully stopped"
+          }
+
+        end # each
+
         @block.call
         exit!
 
       end # if
 
     end # call_daemon
+
+    def msg(message)
+      puts "[#{::Time.now}] Process [#{@pid.pid}] #{message}."
+    end # msg
 
   end # Process
 
