@@ -3,7 +3,7 @@ module Imp
 
   class Process
 
-    EXIT_SIGNALS = ["QUIT", "TERM", "INT", "HUP", "USR2", "USR1"]
+    EXIT_SIGNALS = ["QUIT", "TERM", "INT"]
 
     def initialize(name, log_file = nil, &block)
 
