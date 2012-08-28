@@ -8,7 +8,7 @@ module Imp
     end
 
     def exit
-      puts "unsupported signal `SIGEXIT'"
+      puts "unsupported signal `SIGEXIT`"
     end
 
     def term
