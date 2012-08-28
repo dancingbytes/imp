@@ -44,8 +44,9 @@ module Imp
     def stop(sig = 'QUIT')
 
       return false if @pid.nil? || @stoping
-      msg "is trying to stop.."
       @stoping = true
+
+      msg "is trying to stop.."
 
       begin
         self.signal(sig)
@@ -63,9 +64,6 @@ module Imp
           if self.running?
             sleep(1)
             self.signal('KILL')
-          else
-            msg "successfully stopped"
-            return true
           end
 
         }
@@ -81,8 +79,8 @@ module Imp
       rescue ::Errno::ESRCH
         msg "successfully stopped"
         return true
-      rescue => e
-        msg "unable to forcefully kill. Error: #{e.inspect}"
+      rescue => ex
+        msg "unable to forcefully kill.\n\n#{ex.backtrace}: #{ex.message} (#{ex.class})"
         return false
       ensure
         @stoping = false

@@ -3,8 +3,6 @@ module Imp
 
   class Process
 
-    EXIT_SIGNALS = ["QUIT", "TERM", "INT"]
-
     def initialize(name, log_file = nil, &block)
 
       @name     = name
@@ -36,27 +34,6 @@ module Imp
 
     private
 
-    def trap_signals
-
-      # Если работаем из консоли или запускаем rake-задачу,
-      # игнориуем сигналы, завершающие работу демона.
-      return if defined?(::IRB) || defined?(::Rake)
-
-      # Завершение работы при получении указанных сигналов
-      ::Imp::Process::EXIT_SIGNALS.each do |sig|
-
-        trap(sig) {
-          @pid.stop('QUIT')
-        }
-
-      end # each
-
-      at_exit {
-        @pid.stop('QUIT')
-      }
-
-    end # trap_signals
-
     def redirect_io
 
       begin
@@ -74,9 +51,6 @@ module Imp
     end # redirect_io
 
     def call_daemon
-
-      # for parent
-      trap_signals
 
       rd, wr = ::IO.pipe
 
@@ -116,17 +90,17 @@ module Imp
         msg "was started"
 
         # Завершение работы процесса
-        at_exit {
-          msg "successfully stopped"
-        }
-
-        ["QUIT", "TERM"].each do |sig|
+        ::Imp::EXIT_SIGNALS.each do |sig|
 
           trap(sig) {
             msg "successfully stopped"
           }
 
         end # each
+
+        at_exit {
+          msg "successfully stopped"
+        }
 
         @block.call
         exit!

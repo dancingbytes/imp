@@ -12,6 +12,8 @@ module Imp
 
   extend self
 
+  EXIT_SIGNALS = ["QUIT", "TERM", "INT"].freeze
+
   class Exception < ::RuntimeError; end # Exception
 
   def list
@@ -60,3 +62,5 @@ module Imp
   end # restart_all
 
 end # Imp
+
+require 'imp/exit'
