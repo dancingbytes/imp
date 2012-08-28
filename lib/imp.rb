@@ -5,6 +5,7 @@ require 'imp/pid'
 require 'imp/manager'
 require 'imp/process'
 require 'imp/object'
+require 'imp/trap'
 
 require 'imp/railtie'   if defined?(::Rails)
 
@@ -39,12 +40,16 @@ module Imp
 
   def start_all
 
+    return if locked?
+
     ::Imp::Manager.each(&:start)
     nil
 
   end # start_all
 
   def stop_all(sig = 'QUIT')
+
+    return if locked?
 
     ::Imp::Manager.each do |pr|
       ::Imp::Manager.new(pr.name).stop(sig)
@@ -61,6 +66,12 @@ module Imp
 
   end # restart_all
 
+  def locked?
+    ::Imp::LOCKED
+  end # locked?
+
+  alias :lock? :locked?
+
 end # Imp
 
-require 'imp/exit'
+::Imp::LOCKED = (!::Imp::Trap.catch).freeze

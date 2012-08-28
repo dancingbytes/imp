@@ -50,12 +50,16 @@ module Imp
 
     def start
 
+      return if locked?
+
       @process.start if @process
       nil
 
     end # start
 
     def stop(sig_name = 'QUIT')
+
+      return if locked?
 
       self.refresh
       walk do |pid|
@@ -155,6 +159,10 @@ module Imp
       end
 
     end # walk
+
+    def locked?
+      ::Imp::locked?
+    end # locked?
 
   end # Manager
 
