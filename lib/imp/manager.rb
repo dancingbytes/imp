@@ -44,13 +44,13 @@ module Imp
     def initialize(name)
 
       @process = ::Imp::Manager[name]
-      raise ::Imp::Exception, "Process with name `#{name}` not found!" if @process.nil?
+      puts "Error. Process with name `#{name}` not found!" if @process.nil?
 
     end # new
 
     def start
 
-      @process.start
+      @process.start if @process
       nil
 
     end # start
@@ -74,7 +74,10 @@ module Imp
     end # restart
 
     def refresh
+
       @pids = nil
+      self
+
     end # refresh
 
     alias :reload :refresh
@@ -112,6 +115,8 @@ module Imp
 
     def inspect
 
+      return unless @process
+
       logs   = @process.instance_variable_get(:@log_file)
       block  = @process.instance_variable_get(:@block)
       pids_a = pids.map(&:pid)
@@ -132,7 +137,8 @@ module Imp
 
     def pids
 
-      return @pids if @pids
+      return @pids  if @pids
+      return []     unless @process
 
       @pids = []
       ::Imp::Util::find_by_name(@process.name).each do |pid|
