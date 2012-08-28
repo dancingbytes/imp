@@ -68,7 +68,7 @@ module Imp
     def restart
 
       self.stop
-      sleep 1
+      sleep 0.2
       self.start
 
     end # restart

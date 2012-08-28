@@ -51,4 +51,12 @@ module Imp
 
   end # stop_all
 
+  def restart_all(sig = 'QUIT')
+
+    stop_all(sig)
+    sleep 0.2
+    start_all
+
+  end # restart_all
+
 end # Imp

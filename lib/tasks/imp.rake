@@ -30,6 +30,14 @@ namespace :imp do
 
   end # :stop_all
 
+  desc 'Restart all processes'
+  task :restart_all => :environment do
+
+    Imp.restart_all
+    puts
+
+  end # :restart_all
+
   desc 'Start custom process'
   task :start => :environment do
 
@@ -57,6 +65,20 @@ namespace :imp do
     puts
 
   end # :stop
+
+  desc 'Restart custom process'
+  task :restart => :environment do
+
+    name = ENV["p"] || ENV["process"]
+    if name.nil? || name.blank?
+      puts "Error. Set process name with `p` or `process` variable."
+      exit
+    end
+
+    Imp(name).restart
+    puts
+
+  end # :restart
 
   desc 'Inspect custom process'
   task :inspect => :environment do
@@ -88,8 +110,10 @@ namespace :imp do
     puts "  list                    Show list of process"
     puts "  stop -p=name            Stop process with `name`"
     puts "  start -p=name           Start process with `name`"
+    puts "  restart -p=name         Restart process with `name`"
     puts "  stop_all                Stop all processes"
     puts "  start_all               Start all processes"
+    puts "  restart_all             Restart all processes"
     puts "  show -p=process_name    Show information about process with `name`"
 
     puts
