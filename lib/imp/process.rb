@@ -3,6 +3,8 @@ module Imp
 
   class Process
 
+    EXIT_SIGNALS = ["QUIT", "TERM", "INT", "HUP", "USR2", "USR1"]
+
     def initialize(name, log_file = nil, &block)
 
       @name     = name
@@ -17,13 +19,6 @@ module Imp
       self
 
     end # start
-
-    def reload
-
-      call_daemon(true)
-      self
-
-    end # reload
 
     def name
       @name
@@ -43,14 +38,22 @@ module Imp
 
     def trap_signals
 
-      # Завершение работы
-      ["QUIT", "TERM"].each do |sig|
+      # Если работаем из консоли или запускаем rake-задачу,
+      # игнориуем сигналы, завершающие работу демона.
+      return if defined?(::IRB) || defined?(::Rake)
+
+      # Завершение работы при получении указанных сигналов
+      ::Imp::Process::EXIT_SIGNALS.each do |sig|
 
         trap(sig) {
           @pid.stop('QUIT')
         }
 
       end # each
+
+      at_exit {
+        @pid.stop('QUIT')
+      }
 
     end # trap_signals
 
@@ -70,7 +73,7 @@ module Imp
 
     end # redirect_io
 
-    def call_daemon(exit_after_fork = false)
+    def call_daemon
 
       # for parent
       trap_signals
@@ -88,8 +91,6 @@ module Imp
         ::Process.detach(tmppid)
 
         msg "was started"
-
-        exit! if exit_after_fork
 
       else
 
@@ -113,11 +114,6 @@ module Imp
         redirect_io
 
         msg "was started"
-
-        # Перезагрузка процесса
-        ["HUP"].each do |sig|
-          trap(sig) { reload }
-        end
 
         # Завершение работы процесса
         at_exit {
