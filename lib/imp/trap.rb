@@ -47,6 +47,8 @@ module Imp
 
       begin
         ::Imp.stop_all
+        sleep 0.1
+        ::Process::exit(0)
       ensure
         ::FileUtils.rm ::Imp::Trap::FILE_LOCK, :force => true
       end

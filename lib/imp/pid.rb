@@ -43,7 +43,7 @@ module Imp
 
     def stop(sig = 'QUIT')
 
-      return false if @pid.nil? || @stoping
+      return false if @stoping || !running?
       @stoping = true
 
       msg "is trying to stop.."

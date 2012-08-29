@@ -73,7 +73,7 @@ module Imp
 
         # Detach from the controlling terminal
         raise ::Imp::Exception.new('Cannot detach from controlling terminal') unless ::Process.setsid
-        exit! if fork
+        ::Process::exit! if fork
 
         @pid = ::Imp::Pid.new(::Process.pid)
 
@@ -93,13 +93,17 @@ module Imp
         ::Imp::EXIT_SIGNALS.each do |sig|
 
           trap(sig) {
-            msg "successfully stopped"
+
+            unless @pid.stop(sig)
+              msg "successfully stopped"
+            end
+
           }
 
         end # each
 
         at_exit {
-          msg "successfully stopped"
+          msg "successfully stopped 2"
         }
 
         @block.call
