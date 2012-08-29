@@ -92,6 +92,7 @@ module Imp
         }
 
         @block.call
+        ::Process::exit 0
 
       end # if
 
