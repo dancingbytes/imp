@@ -103,7 +103,6 @@ module Imp
 
       @stoping = false
       msg "successfully stopped"
-      ::Process::exit 0
 
     end # terminated
 
