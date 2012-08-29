@@ -34,22 +34,6 @@ module Imp
 
     private
 
-    def redirect_io
-
-      begin
-        ::STDOUT.reopen @log_file, "a"
-      rescue
-        begin ::STDOUT.reopen "/dev/null"; rescue ::Imp::Exception; end
-      end
-
-      begin ::STDERR.reopen ::STDOUT; rescue ::Imp::Exception; end
-
-      ::STDIN.sync  = true
-      ::STDOUT.sync = true
-      ::STDERR.sync = true
-
-    end # redirect_io
-
     def call_daemon
 
       rd, wr = ::IO.pipe
@@ -73,7 +57,7 @@ module Imp
 
         # Detach from the controlling terminal
         raise ::Imp::Exception.new('Cannot detach from controlling terminal') unless ::Process.setsid
-        ::Process::exit! if fork
+        ::Process::exit! if ::Process.fork
 
         @pid = ::Imp::Pid.new(::Process.pid)
 
@@ -86,6 +70,7 @@ module Imp
         ::File.umask 0000
 
         redirect_io
+        close_io
 
         msg "was started"
 
@@ -111,6 +96,49 @@ module Imp
       end # if
 
     end # call_daemon
+
+    def redirect_io
+
+      begin
+        ::STDOUT.reopen @log_file, "a"
+      rescue
+        begin ::STDOUT.reopen "/dev/null"; rescue ::Imp::Exception; end
+      end
+
+      begin ::STDERR.reopen ::STDOUT; rescue ::Imp::Exception; end
+
+      ::STDIN.sync  = true
+      ::STDOUT.sync = true
+      ::STDERR.sync = true
+
+    end # redirect_io
+
+    def close_io
+
+      io_obj = (defined?(::Kgio) ? ::Kgio::Socket : ::IO)
+
+      ::ObjectSpace.each_object(io_obj) do |io|
+
+        unless [::STDIN, ::STDOUT, ::STDERR].include?(io)
+
+          begin
+            io.close unless io.closed?
+          rescue
+          end
+
+        end
+
+      end # each_object
+
+      ios = ::Array.new(8192) { |i| ::IO.for_fd(i) rescue nil }.compact
+      ios.each do |io|
+
+        next if io.fileno < 3
+        io.close
+
+      end
+
+    end # close_io
 
     def msg(message)
       puts "[#{::Time.now}] Process [#{@pid.pid}] #{message}."
