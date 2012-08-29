@@ -103,11 +103,10 @@ module Imp
         end # each
 
         at_exit {
-          msg "successfully stopped 2"
+          msg "successfully stopped"
         }
 
         @block.call
-        ::Process::exit!
 
       end # if
 
