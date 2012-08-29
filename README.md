@@ -2,7 +2,7 @@ imp
 ======
 
 
-Small daemons for ruby
+Small daemons` manager for ruby
 
 ### Supported environment
 
