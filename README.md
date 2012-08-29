@@ -10,6 +10,11 @@ Ruby:   1.9.3
 
 Rails:  3.0, 3.1, 3.2
 
+### Tested with servers
+
+WEBrik:     1.3.1
+Thin:       1.4.1
+Unicorn:    4.3.1
 
 ### Example
 
@@ -17,15 +22,16 @@ Rails:  3.0, 3.1, 3.2
     require 'imp'
 
     Imp( "name-of-your-proccess", File.join("Path", "to", "log.file") ) do
-
       # do some work
+    end
 
+    # or without logs
+    Imp( "name-of-your-proccess" ) do
+      # do some work
     end
 
     # ... later
-
     Imp("name-of-your-proccess").start
-
 
     ### Lists of commands
 

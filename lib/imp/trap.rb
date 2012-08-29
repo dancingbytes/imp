@@ -3,8 +3,6 @@ module Imp
 
   module Trap
 
-    FILE_LOCK = "/tmp/imp_#{::Process.ppid}.lock".freeze
-
     extend self
 
     def catch
@@ -32,6 +30,13 @@ module Imp
       end
 
     end # catch
+
+    def mpid
+
+      pid = ::Process.ppid
+      pid == 1 ? ::Process.pid : pid
+
+    end # mpid
 
     private
 
@@ -64,3 +69,5 @@ module Imp
   end # Trap
 
 end # Imp
+
+::Imp::Trap::FILE_LOCK = "/tmp/imp_#{::Imp::Trap.mpid}.lock".freeze
