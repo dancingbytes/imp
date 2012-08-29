@@ -95,6 +95,9 @@ module Imp
 
     def signal(name)
 
+      return if locked?
+
+      self.refresh
       walk do |pid|
         pid.signal(name)
       end

@@ -69,8 +69,8 @@ module Imp
         ::Dir.chdir '/'
         ::File.umask 0000
 
-        redirect_io
         close_io
+        redirect_io
 
         msg "was started"
 
@@ -91,8 +91,16 @@ module Imp
           msg "successfully stopped"
         }
 
-        @block.call
-        ::Process::exit 0
+        begin
+          @block.call
+        rescue => ex
+
+          msg "has errors.."
+          puts "#{ex.message} (#{ex.class}): #{ex.backtrace.join("\r")}"
+
+        ensure
+          ::Process::exit(0)
+        end
 
       end # if
 
