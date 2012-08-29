@@ -29,6 +29,9 @@ Rails:  3.0, 3.1, 3.2
 
     ### Lists of commands
 
+    # Show userful information about process
+    Imp("name-of-your-proccess")
+
     # For selected process
     Imp("name-of-your-proccess").stop
 
