@@ -13,7 +13,9 @@ Rails:  3.0, 3.1, 3.2
 ### Tested with servers
 
 WEBrik:     1.3.1
+
 Thin:       1.4.1
+
 Unicorn:    4.3.1
 
 ### Example
