@@ -24,6 +24,8 @@ module Imp
 
         return true
 
+      rescue ::Errno::EACCES
+        return false
       rescue => ex
         puts "[Imp::Trap.catch] Error.\n\n#{ex.backtrace}: #{ex.message} (#{ex.class})"
         return false
