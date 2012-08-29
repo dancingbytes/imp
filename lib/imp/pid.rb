@@ -52,9 +52,7 @@ module Imp
         self.signal(sig)
         sleep(0.5)
       rescue ::Errno::ESRCH
-        @stoping = false
-        msg "successfully stopped"
-        return true
+        terminated
       end
 
       begin
@@ -72,18 +70,17 @@ module Imp
           msg "unable to forcefully kill"
           return false
         else
-          msg "successfully stopped"
-          return true
+          terminated
         end
 
       rescue ::Errno::ESRCH
-        msg "successfully stopped"
-        return true
+        terminated
       rescue => ex
-        msg "unable to forcefully kill.\n\n#{ex.backtrace}: #{ex.message} (#{ex.class})"
-        return false
-      ensure
+
         @stoping = false
+        msg "unable to forcefully kill.\n\n#{ex.backtrace.join('\n')}: #{ex.message} (#{ex.class})"
+        return false
+
       end
 
     end # stop
@@ -101,6 +98,14 @@ module Imp
     def msg(message)
       puts "[#{::Time.now}] Process [#{@pid}] #{message}."
     end # msg
+
+    def terminated
+
+      @stoping = false
+      msg "successfully stopped"
+      ::Process::exit 0
+
+    end # terminated
 
   end # Pid
 

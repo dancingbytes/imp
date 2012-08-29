@@ -37,6 +37,9 @@ module Imp
 
     def exit_process
 
+      return if @terminating
+      @terminating = true
+
       begin
         ::Imp.stop_all
       ensure
@@ -46,6 +49,8 @@ module Imp
     end # exit_process
 
     def trap_signals
+
+      @terminating = false
 
       # Завершение работы при получении указанных сигналов
       ::Imp::EXIT_SIGNALS.each do |sig|
