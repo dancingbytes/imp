@@ -83,8 +83,6 @@ module Imp
           msg "has errors.."
           puts "#{ex.message} (#{ex.class}): #{ex.backtrace.join("\r")}"
 
-        ensure
-          ::Process::exit(0)
         end
 
       end # if
