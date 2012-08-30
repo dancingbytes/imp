@@ -1,7 +1,7 @@
 # encoding: utf-8
 namespace :imp do
 
-  ENV["RAILS_ENV"] = "production" unless ["test", "development", "production"].include?(ENV["RAILS_ENV"] || "")
+  puts "Loading #{::Rails.env} environment"
 
   desc 'List of processes'
   task :list => :environment do
