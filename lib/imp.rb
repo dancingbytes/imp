@@ -8,6 +8,7 @@ require 'imp/object'
 require 'imp/trap'
 
 require 'imp/railtie'   if defined?(::Rails)
+require 'ext/mongo'     if defined?(::Mongo::Pool)
 
 module Imp
 

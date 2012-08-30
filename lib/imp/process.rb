@@ -3,11 +3,12 @@ module Imp
 
   class Process
 
-    def initialize(name, log_file = nil, &block)
+    def initialize(name, log_file = nil, closefd = true, &block)
 
       @name     = name
       @log_file = log_file
       @block    = block
+      @closefd  = closefd === true
 
     end # new
 
@@ -69,27 +70,11 @@ module Imp
         ::Dir.chdir '/'
         ::File.umask 0000
 
-        close_io
+        close_fd if @closefd
         redirect_io
+        trap_signals
 
         msg "was started"
-
-        # Завершение работы процесса
-        ::Imp::EXIT_SIGNALS.each do |sig|
-
-          trap(sig) {
-
-            unless @pid.stop(sig)
-              msg "successfully stopped"
-            end
-
-          }
-
-        end # each
-
-        at_exit {
-          msg "successfully stopped"
-        }
 
         begin
           @block.call
@@ -122,11 +107,9 @@ module Imp
 
     end # redirect_io
 
-    def close_io
+    def close_fd
 
-      io_obj = (defined?(::Kgio) ? ::Kgio::Socket : ::IO)
-
-      ::ObjectSpace.each_object(io_obj) do |io|
+      ::ObjectSpace.each_object(::IO) do |io|
 
         unless [::STDIN, ::STDOUT, ::STDERR].include?(io)
 
@@ -135,11 +118,32 @@ module Imp
           rescue
           end
 
-        end
+        end # unless
 
       end # each_object
 
-    end # close_io
+    end # close_fd
+
+    def trap_signals
+
+      # Завершение работы процесса
+      ::Imp::EXIT_SIGNALS.each do |sig|
+
+        trap(sig) {
+
+          unless @pid.stop(sig)
+            msg "successfully stopped"
+          end
+
+        }
+
+      end # each
+
+      at_exit {
+        msg "successfully stopped"
+      }
+
+    end # trap_signals
 
     def msg(message)
       puts "[#{::Time.now}] Process [#{@pid.pid}] #{message}."

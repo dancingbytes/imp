@@ -5,12 +5,12 @@ module Imp
 
     private
 
-    def Imp(name, logs = nil, &block)
+    def Imp(name, logs = nil, closefd = true, &block)
 
       if block_given?
 
         ::Imp::Manager.register(
-          ::Imp::Process.new(name.to_s, logs, &block)
+          ::Imp::Process.new(name.to_s, logs, closefd, &block)
         )
 
       end # if
