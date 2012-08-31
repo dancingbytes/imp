@@ -19,6 +19,13 @@ module Imp
 
     end # Imp
 
+    def imp(name, logs = nil, closefd = true, &block)
+
+      imp_proc = ::Imp::Process.new(name.to_s, logs, closefd, &block)
+      imp_proc.start
+
+    end # imp
+
   end # Object
 
 end # Imp

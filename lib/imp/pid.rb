@@ -34,6 +34,7 @@ module Imp
       self.class.running?(@pid)
     end # running?
 
+    alias :run?    :running?
     alias :exists? :running?
     alias :exist?  :running?
 
@@ -85,13 +86,10 @@ module Imp
 
     end # stop
 
-    def inspect
+    def inspect; nil; end
 
-      "#<Imp::Pid\n" <<
-      " pid:      #{@pid || 0},\n" <<
-      " running:  #{self.running?}>\n"
-
-    end # inspect
+    alias :to_s   :inspect
+    alias :to_str :inspect
 
     private
 

@@ -23,6 +23,13 @@ Unicorn:    4.3.1
     ### Simple use
     require 'imp'
 
+    ### 1. With process registration
+
+    # format
+    #
+    # Imp(proc_name, [file_log = nil], [close_file_descriptors = true], &block)
+    #
+
     Imp( "name-of-your-proccess", File.join("Path", "to", "log.file") ) do
       # do some work
     end
@@ -32,8 +39,23 @@ Unicorn:    4.3.1
       # do some work
     end
 
-    # ... later
+    # And then start
     Imp("name-of-your-proccess").start
+
+    ### 2. Without process registartion
+
+    # format
+    #
+    # imp(proc_name, [file_log = nil], [close_file_descriptors = true], &block)
+    #
+
+    imp( "name-of-your-proccess" ) do
+      # do some work
+    end
+
+    ### Why to register process?
+    Registered process can be auto stopped when master process is exit
+    and may be managed by you (stop, run, send signals) through rails console or rake task
 
     ### Lists of commands
 

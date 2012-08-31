@@ -20,7 +20,7 @@ module Imp
 
   def list
 
-    puts "=> Imp`s process list"
+    puts "=> Imp`s registered process list"
 
     ::Imp::Manager.names do |name|
 

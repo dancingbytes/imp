@@ -23,15 +23,44 @@ module Imp
       @name
     end # name
 
+    def running?
+
+      return false if @pid.nil?
+      @pid.running?
+
+    end # running?
+
+    alias :run?    :running?
+    alias :exists? :running?
+    alias :exist?  :running?
+
+    def signal(sig)
+
+      return false if @pid.nil?
+      @pid.signal(sig)
+
+    end # signal
+
+    def stop(sig = 'QUIT')
+
+      return false if @pid.nil?
+      @pid.stop(sig)
+
+    end # stop
+
     def inspect
 
       "#<Imp::Process\n" <<
+      " process:  #{@name},\n" <<
       " pid:      #{@pid ? @pid.pid : 0},\n" <<
-      " name:     #{@name},\n" <<
-      " logs:     #{@log_file},\n" <<
+      " running:  #{self.running?},\n"
+      " logs:     #{@log_file || '/dev/null' },\n" <<
       " block:    #{@block.inspect}>\n"
 
     end # inspect
+
+    alias :to_s   :inspect
+    alias :to_str :inspect
 
     private
 
