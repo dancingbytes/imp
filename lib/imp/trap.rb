@@ -73,7 +73,11 @@ module Imp
 end # Imp
 
 if defined?(::Rails)
-  ::Imp::Trap::FILE_LOCK = "#{::Rails.root}/tmp/imp_#{::Imp::Trap.mpid}.lock".freeze
+
+  dir = File.join(::Rails.root || ::Dir.pwd, "tmp")
+  ::FileUtils.mkdir_p(dir, :mode => 0755) unless ::FileTest.directory?(dir)
+  ::Imp::Trap::FILE_LOCK = ::File.join(dir, "imp_#{::Imp::Trap.mpid}.lock").freeze
+
 else
   ::Imp::Trap::FILE_LOCK = "/tmp/imp_#{::Imp::Trap.mpid}.lock".freeze
 end
