@@ -50,7 +50,7 @@ module Imp
         sleep 0.1
         ::Process::exit(0)
       ensure
-        ::FileUtils.rm ::Imp::Trap::FILE_LOCK, :force => true
+        ::FileUtils.rm(::Imp::Trap::FILE_LOCK, :force => true)
       end
 
     end # exit_process
@@ -72,4 +72,8 @@ module Imp
 
 end # Imp
 
-::Imp::Trap::FILE_LOCK = "/tmp/imp_#{::Imp::Trap.mpid}.lock".freeze
+if defined?(::Rails)
+  ::Imp::Trap::FILE_LOCK = File.join(::Rails.root, "tmp", "imp_#{::Imp::Trap.mpid}.lock").freeze
+else
+  ::Imp::Trap::FILE_LOCK = "/tmp/imp_#{::Imp::Trap.mpid}.lock".freeze
+end
