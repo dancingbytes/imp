@@ -18,7 +18,7 @@ module Imp
         f = ::File.new(::Imp::Trap::FILE_LOCK, ::File::RDWR|::File::CREAT, 0400)
         return false if (f.flock(::File::LOCK_EX) === false)
 
-        trap_signals
+        # trap_signals
 
         return true
 
