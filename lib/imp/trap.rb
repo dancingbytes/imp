@@ -32,10 +32,7 @@ module Imp
     end # catch
 
     def mpid
-
-      pid = ::Process.ppid
-      pid == 1 ? ::Process.pid : pid
-
+      ::Process.pid
     end # mpid
 
     private
