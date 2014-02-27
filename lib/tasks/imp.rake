@@ -49,7 +49,7 @@ namespace :imp do
       exit
     end
 
-    Imp(name).start
+    Imp.start(name)
     puts
 
   end # :start
@@ -63,7 +63,7 @@ namespace :imp do
       exit
     end
 
-    Imp(name).stop
+    Imp.stop(name)
     puts
 
   end # :stop
@@ -77,7 +77,7 @@ namespace :imp do
       exit
     end
 
-    Imp(name).restart
+    Imp.restart(name)
     puts
 
   end # :restart
@@ -91,7 +91,7 @@ namespace :imp do
       exit
     end
 
-    puts Imp(name).inspect
+    puts Imp.inspect(name)
     puts
 
   end # :inspect

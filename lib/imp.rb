@@ -22,6 +22,18 @@ module Imp
     ::Imp::Manager.new(name).start
   end # start
 
+  def stop(name)
+    ::Imp::Manager.new(name).stop
+  end # stop
+
+  def restart(name)
+    ::Imp::Manager.new(name).restart
+  end # restart
+
+  def inspect(name)
+    ::Imp::Manager.new(name).inspect
+  end # inspect
+
   def list
 
     puts "=> Imp`s registered process list"
