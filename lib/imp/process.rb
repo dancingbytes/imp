@@ -3,14 +3,29 @@ module Imp
 
   class Process
 
-    def initialize(name, log_file = nil, closefd = true, &block)
+    def initialize(name, log_file = nil, closefd = true, &pr)
 
       @name     = name
       @log_file = log_file
-      @block    = block
+      @block    = pr
       @closefd  = closefd === true
+      @before_exit = ->{}
 
     end # new
+
+    def before_exit=(pr)
+
+      @before_exit = pr if pr.is_a?(::Proc)
+      self
+
+    end # before_exit=
+
+    def block=(pr)
+
+      @block = pr if pr.is_a?(::Proc)
+      self
+
+    end # block=
 
     def start
 
@@ -106,7 +121,7 @@ module Imp
         msg "was started"
 
         begin
-          @block.call
+          @block.call if @block.is_a?(::Proc)
         rescue => ex
 
           msg "has errors.."
@@ -164,6 +179,7 @@ module Imp
 
         trap(sig) {
 
+          @before_exit.call
           unless @pid.stop(sig)
             msg "successfully stopped"
           end

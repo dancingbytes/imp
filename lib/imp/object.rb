@@ -7,14 +7,9 @@ module Imp
 
     def Imp(name, logs = nil, closefd = true, &block)
 
-      if block_given?
-
-        ::Imp::Manager.register(
-          ::Imp::Process.new(name.to_s, logs, closefd, &block)
-        )
-
-      end # if
-
+      ::Imp::Manager.register(
+        ::Imp::Process.new(name.to_s, logs, closefd, &block)
+      )
       ::Imp::Manager.new(name)
 
     end # Imp

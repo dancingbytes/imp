@@ -48,6 +48,22 @@ module Imp
 
     end # new
 
+    def before_exit=(pr)
+
+      return if locked?
+      @process.before_exit = pr
+      self
+
+    end # before_exit=
+
+    def block=(pr)
+
+      return if locked?
+      @process.block = pr
+      self
+
+    end # block=
+
     def start
 
       return if locked?
@@ -65,6 +81,7 @@ module Imp
       walk do |pid|
         pid.stop(sig_name)
       end
+
       nil
 
     end # stop

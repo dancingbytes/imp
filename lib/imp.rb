@@ -18,6 +18,10 @@ module Imp
 
   class Exception < ::RuntimeError; end # Exception
 
+  def start(name)
+    ::Imp::Manager.new(name).start
+  end # start
+
   def list
 
     puts "=> Imp`s registered process list"
