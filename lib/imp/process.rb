@@ -125,6 +125,7 @@ module Imp
         rescue => ex
 
           msg "has errors.."
+          puts "#{ex.inspect}"
           puts "#{ex.message} (#{ex.class}): #{ex.backtrace.join("\r")}"
 
         end
@@ -179,7 +180,10 @@ module Imp
 
         trap(sig) {
 
-          @before_exit.call
+          ::Thread.new {
+            @before_exit.call
+          }
+
           unless @pid.stop(sig)
             msg "successfully stopped"
           end
